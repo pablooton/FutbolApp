@@ -1,10 +1,12 @@
 import Button from "@/components/Button";
 import FormInput from "@/components/FormInput";
 import { zodResolver } from "@hookform/resolvers/zod";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, router } from "expo-router";
 import { useForm } from "react-hook-form";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { z } from "zod";
+
 
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -24,12 +26,13 @@ const RegisterScreen = () => {
     reValidateMode: "onBlur",
   });
 
-  const onSubmit = (formData: { email: string, password: string; confirmPassword: string }) => {
+  const onSubmit = async(formData: { email: string, password: string; confirmPassword: string }) => {
     if(formData.password !== formData.confirmPassword){
         Alert.alert("Password don´t match");
         return;
     }
     if (formData.email !== "admin@liceolapaz.net") {
+      await AsyncStorage.setItem("userEmail",formData.email);  
       router.push("/teams");
     }
     else {
