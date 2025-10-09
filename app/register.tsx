@@ -9,31 +9,37 @@ import { z } from "zod";
 const formSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword:z.string().min(6,"Password must be at least 6 characters")
 });
 
-const LoginScreen = () => {
+const RegisterScreen = () => {
   const { control, handleSubmit } = useForm({
     defaultValues: {
       email: "",
       password: "",
+      confirmPassword:"",
     },
     resolver: zodResolver(formSchema),
     mode: "onBlur",
     reValidateMode: "onBlur",
   });
 
-  const onSubmit = (formData: { email: string, password: string; }) => {
-    if (formData.email === "admin@liceolapaz.net") {
+  const onSubmit = (formData: { email: string, password: string; confirmPassword: string }) => {
+    if(formData.password !== formData.confirmPassword){
+        Alert.alert("Password don´t match");
+        return;
+    }
+    if (formData.email !== "admin@liceolapaz.net") {
       router.push("/teams");
     }
     else {
-      Alert.alert("Invalid credentials");
+      Alert.alert("Account already exists");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Register</Text>
       <FormInput
         control={control}
         name="email"
@@ -50,12 +56,20 @@ const LoginScreen = () => {
         placeholder="Enter your password"
         secureTextEntry
       />
-       <Link href="/register" style={styles.link}>
-          <Text style={styles.linkText}>
-            Don´t have an Account ? Register here  
-          </Text>
-        </Link>
-      <Button text="Login" onPress={handleSubmit(onSubmit)} />
+      <FormInput
+        control={control}
+        name="confirmPassword"
+        autoCapitalize="none"
+        inputMode="text"
+        placeholder="Confirm your password"
+        secureTextEntry
+      />
+      <Link href="/" style={styles.link}>
+    <Text style={styles.linkText}>
+        Already have an Account? Login here
+        </Text>
+    </Link>
+      <Button text="Register" onPress={handleSubmit(onSubmit)} />
     </View>
   );
 };
@@ -81,4 +95,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default RegisterScreen;
