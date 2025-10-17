@@ -3,6 +3,7 @@ import FormInput from "@/components/FormInput";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, router } from "expo-router";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { useForm } from "react-hook-form";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { z } from "zod";
@@ -15,6 +16,7 @@ const formSchema = z.object({
 });
 
 const RegisterScreen = () => {
+  const auth = getAuth();
   const { control, handleSubmit } = useForm({
     defaultValues: {
       email: "",
@@ -31,13 +33,17 @@ const RegisterScreen = () => {
         Alert.alert("Password don´t match");
         return;
     }
-    if (formData.email !== "admin@liceolapaz.net") {
-      await AsyncStorage.setItem("userEmail",formData.email);  
-      router.push("/teams");
-    }
-    else {
-      Alert.alert("Account already exists");
-    }
+    createUserWithEmailAndPassword(auth, formData.email, formData.password)
+      .then(async (userCredential) => {
+        const { email } = userCredential.user;
+        if (email) {
+          await AsyncStorage.setItem("userEmail", email);
+          router.push("/teams");
+        }
+      })
+      .catch(() => {
+        Alert.alert("Error creating account");
+      });
   };
 
   return (
