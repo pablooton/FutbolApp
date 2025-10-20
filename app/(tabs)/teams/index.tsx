@@ -1,5 +1,6 @@
 import TeamCard from "@/components/TeamCard";
-import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { router } from "expo-router";
+import { collection, deleteDoc, doc, getDocs, getFirestore } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Alert, FlatList, StyleSheet, Text } from "react-native";
 
@@ -26,7 +27,12 @@ const teamsScreen = () => {
   };
 
   useEffect(loadTeams, []);
-    const edit = (team : Team) => console.log(`Editing $ {team.name}) (id: $ {team.id})`);
+    const edit = (team : Team) => router.push({
+              pathname: "./teams/form",
+              params: {
+                id: team.id,
+              },
+            });;
     const remove = (team : Team) => (
         Alert.alert("Remove Team",`Are you sure you want to remove ${team.name}?`,[
             {
@@ -35,7 +41,10 @@ const teamsScreen = () => {
             },
             {
                 text:"Remove",
-                onPress: () => setTeams(previousTeams => previousTeams.filter(t => t.id !== team.id)),
+                onPress: () => {
+                  deleteDoc(doc(db,"teams",team.id));
+                  loadTeams();
+                }
             },
         ])
     );
@@ -49,7 +58,7 @@ const teamsScreen = () => {
       renderItem={({ item }) => (
         <TeamCard
           team={item}
-          edit={() => console.log(`Editing ${item.name} (id: ${item.id})`)}
+          edit={() => edit(item)}
           remove={() => remove(item)}
         />
       )}

@@ -1,7 +1,8 @@
 import FilterBadge from "@/components/FilterBadge";
 import PlayerCard from "@/components/PlayerCard";
 import SearchBar from "@/components/SearchBar";
-import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { router } from "expo-router";
+import { collection, deleteDoc, doc, getDocs, getFirestore } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { Alert, FlatList, StyleSheet, Text } from "react-native";
 
@@ -66,6 +67,14 @@ const PlayersScreen = () => {
     
     setFilteredPlayers(searchedPlayers.filter(player => filters.find(filter => filter.active && filter.value === player.position)));
   }, [players, filters, searchString]);
+  const edit = (player:Player) =>{
+    router.push({
+              pathname: "./players/form",
+              params: {
+                id: player.id,
+              },
+            });
+  }
 
     const remove = (player : Player) => (
         Alert.alert("Remove Player",`Are you sure you want to remove ${player.name}?`,[
@@ -75,7 +84,10 @@ const PlayersScreen = () => {
             },
             {
                 text:"Remove",
-                onPress: () => setPlayers(previousPlayers => previousPlayers.filter(p => p.id !== player.id)),
+                onPress: () => {
+                  deleteDoc(doc(db,"players",player.id));
+                  loadPlayers();
+                }
             },
         ])
     );
@@ -116,7 +128,7 @@ const PlayersScreen = () => {
         renderItem={({ item }) => (
         <PlayerCard
             player={item}
-            edit={() => console.log(`Editing ${item.name} (id: ${item.id})`)}
+            edit={() => edit(item)}
             remove={() => remove(item)}
             />
         )}

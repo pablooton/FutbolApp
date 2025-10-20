@@ -1,14 +1,15 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Link, router, Tabs } from 'expo-router';
+import { Href, Link, router, Tabs, usePathname } from 'expo-router';
 import { getAuth, signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 
 const TabLayout = () => {
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+    const [userEmail, setUserEmail] = useState<string | null>(null);
   const [loadingUser, setLoadingUser] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const getUserEmail = async () => {
@@ -57,6 +58,12 @@ const logout = () => {
       },
     ]);
   }
+   const goToForm = () => {
+    const path = `${pathname}/form` as Href;
+    router.push(path);
+  };
+
+  const validPathname = () => pathname === "/teams" || pathname === "/players";
 
 
   return (
@@ -107,7 +114,8 @@ const logout = () => {
               )}
             </Pressable>,
           headerRight: () =>
-            <Pressable>
+            validPathname() &&
+            <Pressable onPress={goToForm}>
               {({ pressed }) => (
                 <FontAwesome
                   name="plus-circle"
